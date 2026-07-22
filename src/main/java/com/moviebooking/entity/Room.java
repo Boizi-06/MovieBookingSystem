@@ -24,6 +24,13 @@ public class Room {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(name = "room_type", nullable = false, length = 20)
+    private String roomType; // "STANDARD", "VIP", "IMAX"
+
+    @Column(name = "total_seats", nullable = false)
+    @Builder.Default
+    private Integer totalSeats = 0;
+
     @Column(nullable = false, length = 20)
     private String status; // "ACTIVE", "MAINTENANCE", "INACTIVE"
 
