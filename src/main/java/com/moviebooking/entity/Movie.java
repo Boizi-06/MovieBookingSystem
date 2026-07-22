@@ -31,8 +31,26 @@ public class Movie {
     @Column(name = "release_date", nullable = false)
     private LocalDate releaseDate;
 
-    @Column(name = "poster_url", length = 255)
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
+    @Column(name = "age_rating", length = 20)
+    private String ageRating; // "P", "C13", "C16", "C18"
+
+    @Column(length = 100)
+    private String language;
+
+    @Column(length = 255)
+    private String director;
+
+    @Column(columnDefinition = "TEXT")
+    private String cast;
+
+    @Column(name = "poster_url", length = 500)
     private String posterUrl;
+
+    @Column(name = "trailer_url", length = 500)
+    private String trailerUrl;
 
     @Column(nullable = false, length = 20)
     private String status; // "UPCOMING", "NOW_SHOWING", "ENDED", "INACTIVE"
