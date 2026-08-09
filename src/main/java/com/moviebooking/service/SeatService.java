@@ -24,17 +24,17 @@ public class SeatService {
     }
 
     /**
-     * Khởi tạo sơ đồ 60 ghế mặc định cho phòng chiếu:
-     * - Hàng A-E (40 ghế): Ghế Thường (STANDARD, hệ số giá 1.0)
-     * - Hàng F-G (16 ghế): Ghế VIP (VIP, hệ số giá 1.2)
-     * - Hàng H (4 ghế đôi): Ghế Đôi (COUPLE, hệ số giá 1.5)
+     * Khởi tạo sơ đồ ghế mặc định cho phòng chiếu:
+     * - Hàng A, B, C (24 ghế): Ghế Thường (STANDARD, hệ số giá 1.0)
+     * - Hàng D, E (16 ghế): Ghế VIP (VIP, hệ số giá 1.2)
+     * - Hàng F (4 ghế đôi): Ghế Đôi (SWEETBOX, hệ số giá 1.5)
      */
     @Transactional
     public List<Seat> generateDefaultSeats(Room room) {
         List<Seat> seats = new ArrayList<>();
 
-        // 1. Hàng A đến E: Ghế Thường (STANDARD) - 8 ghế mỗi hàng
-        String[] standardRows = {"A", "B", "C", "D", "E"};
+        // 1. Hàng A, B, C: Ghế Thường (STANDARD) - 8 ghế mỗi hàng
+        String[] standardRows = {"A", "B", "C"};
         for (String row : standardRows) {
             for (int i = 1; i <= 8; i++) {
                 String seatCode = String.format("%s%02d", row, i);
@@ -51,8 +51,8 @@ public class SeatService {
             }
         }
 
-        // 2. Hàng F đến G: Ghế VIP (VIP) - 8 ghế mỗi hàng
-        String[] vipRows = {"F", "G"};
+        // 2. Hàng D, E: Ghế VIP (VIP) - 8 ghế mỗi hàng
+        String[] vipRows = {"D", "E"};
         for (String row : vipRows) {
             for (int i = 1; i <= 8; i++) {
                 String seatCode = String.format("%s%02d", row, i);
@@ -69,15 +69,15 @@ public class SeatService {
             }
         }
 
-        // 3. Hàng H: Ghế Đôi (COUPLE) - 4 ghế đôi
+        // 3. Hàng F (Hàng cuối cùng): 4 ghế đôi (SWEETBOX)
         for (int i = 1; i <= 4; i++) {
-            String seatCode = String.format("H%02d", i);
+            String seatCode = String.format("F%02d", i);
             Seat seat = Seat.builder()
                     .room(room)
-                    .seatRow("H")
+                    .seatRow("F")
                     .seatNumber(i)
                     .seatCode(seatCode)
-                    .seatType("COUPLE")
+                    .seatType("SWEETBOX")
                     .priceMultiplier(new BigDecimal("1.50"))
                     .status("ACTIVE")
                     .build();
@@ -85,6 +85,12 @@ public class SeatService {
         }
 
         return seatRepository.saveAll(seats);
+    }
+
+    @Transactional
+    public List<Seat> resetAndRegenerateSeatsForRoom(Room room) {
+        seatRepository.deleteByRoomId(room.getId());
+        return generateDefaultSeats(room);
     }
 
     @Transactional(readOnly = true)

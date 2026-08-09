@@ -35,11 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = tokenProvider.getEmailFromToken(jwt);
                 String role = tokenProvider.getRoleFromToken(jwt);
 
-                // Thêm tiền tố ROLE_ để Spring Security nhận dạng đúng vai trò phân quyền
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+                java.util.List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+                if (role != null) {
+                    String cleanRole = role.replace("ROLE_", "");
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + cleanRole));
+                    authorities.add(new SimpleGrantedAuthority(cleanRole));
+                }
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        email, null, Collections.singletonList(authority));
+                        email, null, authorities);
                 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

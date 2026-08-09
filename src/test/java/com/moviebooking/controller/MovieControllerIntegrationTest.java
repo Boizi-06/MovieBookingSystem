@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.HashSet;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,6 +108,7 @@ public class MovieControllerIntegrationTest {
         Cinema cinema = Cinema.builder()
                 .name("CGV Test")
                 .address("123 Test Street")
+                .city("Hà Nội")
                 .status("ACTIVE")
                 .build();
         cinema = cinemaRepository.save(cinema);
@@ -114,6 +116,7 @@ public class MovieControllerIntegrationTest {
         testRoom = Room.builder()
                 .cinema(cinema)
                 .name("Phòng 01")
+                .roomType("STANDARD")
                 .status("ACTIVE")
                 .build();
         testRoom = roomRepository.save(testRoom);
@@ -219,7 +222,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("UPCOMING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         existingMovie = movieRepository.save(existingMovie);
 
@@ -282,7 +285,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("UPCOMING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         existingMovie = movieRepository.save(existingMovie);
 
@@ -311,7 +314,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("UPCOMING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movieToDelete = movieRepository.save(movieToDelete);
 
@@ -333,7 +336,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("NOW_SHOWING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movieWithPastShowtime = movieRepository.save(movieWithPastShowtime);
 
@@ -367,7 +370,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("NOW_SHOWING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movieWithFutureShowtime = movieRepository.save(movieWithFutureShowtime);
 
@@ -397,7 +400,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("UPCOMING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movie = movieRepository.save(movie);
 
@@ -415,7 +418,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("NOW_SHOWING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movieRepository.save(activeMovie);
 
@@ -426,7 +429,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("INACTIVE")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movieRepository.save(inactiveMovie);
 
@@ -447,7 +450,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("INACTIVE")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movieRepository.save(inactiveMovie);
 
@@ -467,7 +470,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Anh")
                 .status("NOW_SHOWING")
-                .genres(Set.of(comedyGenre))
+                .genres(new HashSet<>(Set.of(comedyGenre)))
                 .build();
         movieRepository.save(movie1);
 
@@ -489,7 +492,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("NOW_SHOWING")
-                .genres(Set.of(comedyGenre))
+                .genres(new HashSet<>(Set.of(comedyGenre)))
                 .build();
         movieRepository.save(movie);
 
@@ -515,7 +518,7 @@ public class MovieControllerIntegrationTest {
                 .language("Tiếng Anh")
                 .director("Denis Villeneuve")
                 .status("NOW_SHOWING")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         movie = movieRepository.save(movie);
 
@@ -535,7 +538,7 @@ public class MovieControllerIntegrationTest {
                 .ageRating("P")
                 .language("Tiếng Việt")
                 .status("INACTIVE")
-                .genres(Set.of(actionGenre))
+                .genres(new HashSet<>(Set.of(actionGenre)))
                 .build();
         inactiveMovie = movieRepository.save(inactiveMovie);
 

@@ -27,4 +27,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             @Param("status") String status,
             @Param("excludeInactive") boolean excludeInactive,
             Pageable pageable);
+
+    @Query("SELECT m FROM Movie m LEFT JOIN Showtime s ON s.movie.id = m.id LEFT JOIN Booking b ON b.showtime.id = s.id AND b.status IN ('PAID', 'CONFIRMED', 'COMPLETED') WHERE m.status != 'INACTIVE' GROUP BY m.id ORDER BY COALESCE(SUM(b.totalPrice), 0) DESC, m.id DESC")
+    java.util.List<Movie> findTopRevenueMovies(Pageable pageable);
 }

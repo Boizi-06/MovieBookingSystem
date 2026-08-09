@@ -85,16 +85,11 @@ public class AuthService {
                 .build();
         emailVerificationTokenRepository.save(verificationToken);
 
-        // 6. Xây dựng đường dẫn kích thực gửi trực tiếp về Backend REST để người dùng click trình duyệt kiểm thử được ngay
-        String verifyLink = "http://localhost:8080/api/v1/auth/verify-email?token=" + verifyToken;
+        // 6. Xây dựng đường dẫn kích hoạt trỏ tới Frontend
+        String verifyLink = frontendUrl + "/verify-email?token=" + verifyToken;
 
-        // In liên kết ra Console giả lập gửi email
-        System.out.println("\n==========================================================================");
-        System.out.println("[EMAIL MOCK] ĐĂNG KÝ TÀI KHOẢN THÀNH CÔNG - GỬI LINK XÁC THỰC EMAIL!");
-        System.out.println("Gửi tới email: " + savedUser.getEmail());
-        System.out.println("Vui lòng click đường dẫn sau hoặc dán trực tiếp vào Trình duyệt để kích hoạt:");
-        System.out.println(verifyLink);
-        System.out.println("==========================================================================\n");
+        // 7. Gửi email kích hoạt tài khoản
+        emailService.sendVerificationEmail(savedUser.getEmail(), verifyLink);
 
         return savedUser;
     }
@@ -191,11 +186,8 @@ public class AuthService {
                     .build();
             passwordResetTokenRepository.save(resetToken);
 
-            // Xây dựng đường dẫn URL khôi phục mật khẩu gửi tới Frontend
-            String resetLink = frontendUrl + "/reset-password?token=" + token;
-
-            // Gửi email giả lập (in ra console)
-            emailService.sendResetPasswordEmail(user.getEmail(), resetLink);
+            // Gửi email chứa mã xác thực (token) tới khách hàng
+            emailService.sendResetPasswordEmail(user.getEmail(), token);
         }
     }
 

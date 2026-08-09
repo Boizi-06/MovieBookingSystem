@@ -60,6 +60,13 @@ public class MovieService {
         return MovieResponse.fromEntity(movie);
     }
 
+    @Transactional(readOnly = true)
+    public List<MovieResponse> getTopRevenueMovies(int limit) {
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        List<Movie> movies = movieRepository.findTopRevenueMovies(pageable);
+        return movies.stream().map(MovieResponse::fromEntity).toList();
+    }
+
     @Transactional
     public MovieResponse createMovie(MovieRequest request) {
         // BR-MOVIE-04: Ngày kết thúc phải lớn hơn hoặc bằng ngày khởi chiếu
@@ -95,6 +102,7 @@ public class MovieService {
                 .director(request.getDirector() != null ? request.getDirector().trim() : null)
                 .cast(request.getCast() != null ? request.getCast().trim() : null)
                 .posterUrl(request.getPosterUrl() != null ? request.getPosterUrl().trim() : null)
+                .bannerUrl(request.getBannerUrl() != null ? request.getBannerUrl().trim() : null)
                 .trailerUrl(request.getTrailerUrl() != null ? request.getTrailerUrl().trim() : null)
                 .status(status)
                 .genres(genreSet)
@@ -146,6 +154,7 @@ public class MovieService {
         movie.setDirector(request.getDirector() != null ? request.getDirector().trim() : null);
         movie.setCast(request.getCast() != null ? request.getCast().trim() : null);
         movie.setPosterUrl(request.getPosterUrl() != null ? request.getPosterUrl().trim() : null);
+        movie.setBannerUrl(request.getBannerUrl() != null ? request.getBannerUrl().trim() : null);
         movie.setTrailerUrl(request.getTrailerUrl() != null ? request.getTrailerUrl().trim() : null);
         movie.setStatus(status);
         movie.setGenres(genreSet);

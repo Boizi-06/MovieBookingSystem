@@ -86,8 +86,9 @@ public class AuthController {
 
     @PostMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
-            @AuthenticationPrincipal String email,
+            java.security.Principal principal,
             @Valid @RequestBody ChangePasswordRequest request) {
+        String email = principal.getName();
         authService.changePassword(email, request);
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .success(true)

@@ -98,4 +98,16 @@ public class RoomController {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/{id}/reset-seats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<RoomResponse>> resetSeatsForRoom(@PathVariable("id") Long id) {
+        RoomResponse roomResponse = roomService.resetSeatsForRoom(id);
+        ApiResponse<RoomResponse> response = ApiResponse.<RoomResponse>builder()
+                .success(true)
+                .message("Tái tạo sơ đồ ghế mặc định cho phòng chiếu thành công")
+                .data(roomResponse)
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

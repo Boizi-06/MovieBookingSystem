@@ -42,6 +42,8 @@ public class MovieRequest {
 
     private String posterUrl;
 
+    private String bannerUrl;
+
     private String trailerUrl;
 
     @Pattern(regexp = "^(UPCOMING|NOW_SHOWING|ENDED|INACTIVE)$", message = "Trạng thái phim không hợp lệ")

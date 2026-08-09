@@ -81,6 +81,18 @@ public class MovieController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/top-revenue")
+    public ResponseEntity<ApiResponse<java.util.List<MovieResponse>>> getTopRevenueMovies(
+            @RequestParam(value = "limit", defaultValue = "3") int limit) {
+        java.util.List<MovieResponse> topMovies = movieService.getTopRevenueMovies(limit);
+        ApiResponse<java.util.List<MovieResponse>> response = ApiResponse.<java.util.List<MovieResponse>>builder()
+                .success(true)
+                .message("Lấy danh sách top phim doanh thu cao nhất thành công")
+                .data(topMovies)
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MovieResponse>> createMovie(@Valid @RequestBody MovieRequest request) {

@@ -4,6 +4,7 @@ import com.moviebooking.dto.RoomRequest;
 import com.moviebooking.dto.RoomResponse;
 import com.moviebooking.entity.Cinema;
 import com.moviebooking.entity.Room;
+import com.moviebooking.entity.Seat;
 import com.moviebooking.repository.CinemaRepository;
 import com.moviebooking.repository.RoomRepository;
 import com.moviebooking.repository.SeatRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class RoomService {
@@ -81,10 +83,22 @@ public class RoomService {
 
         Room savedRoom = roomRepository.save(room);
 
-        // Khởi tạo tự động 60 ghế mặc định cho phòng chiếu mới
-        seatService.generateDefaultSeats(savedRoom);
-        savedRoom.setTotalSeats(60);
+        // Khởi tạo tự động sơ đồ ghế mặc định cho phòng chiếu mới
+        List<Seat> generatedSeats = seatService.generateDefaultSeats(savedRoom);
+        savedRoom.setTotalSeats(generatedSeats.size());
         savedRoom = roomRepository.save(savedRoom);
+
+        return RoomResponse.fromEntity(savedRoom);
+    }
+
+    @Transactional
+    public RoomResponse resetSeatsForRoom(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng chiếu với ID: " + roomId));
+
+        List<Seat> newSeats = seatService.resetAndRegenerateSeatsForRoom(room);
+        room.setTotalSeats(newSeats.size());
+        Room savedRoom = roomRepository.save(room);
 
         return RoomResponse.fromEntity(savedRoom);
     }

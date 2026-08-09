@@ -275,6 +275,7 @@ public class CinemaControllerIntegrationTest {
         com.moviebooking.entity.Room room = com.moviebooking.entity.Room.builder()
                 .name("Phòng 01")
                 .cinema(cinemaWithRoom)
+                .roomType("STANDARD")
                 .status("ACTIVE")
                 .build();
         roomRepository.save(room);
@@ -302,6 +303,7 @@ public class CinemaControllerIntegrationTest {
         com.moviebooking.entity.Room room = com.moviebooking.entity.Room.builder()
                 .name("Phòng 02")
                 .cinema(cinema)
+                .roomType("STANDARD")
                 .status("ACTIVE")
                 .build();
         room = roomRepository.save(room);

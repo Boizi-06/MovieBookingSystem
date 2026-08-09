@@ -27,6 +27,7 @@ public class MovieResponse {
     private String director;
     private String cast;
     private String posterUrl;
+    private String bannerUrl;
     private String trailerUrl;
     private String status;
     private Set<GenreResponse> genres;
@@ -53,6 +54,7 @@ public class MovieResponse {
                 .director(movie.getDirector())
                 .cast(movie.getCast())
                 .posterUrl(movie.getPosterUrl())
+                .bannerUrl(movie.getBannerUrl())
                 .trailerUrl(movie.getTrailerUrl())
                 .status(movie.getStatus())
                 .genres(genreResponses)

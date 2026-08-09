@@ -13,10 +13,13 @@ CREATE TABLE IF NOT EXISTS movies (
     duration INT NOT NULL,
     release_date DATE NOT NULL,
     poster_url VARCHAR(255),
+    banner_url VARCHAR(500),
     status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+ALTER TABLE movies ADD COLUMN IF NOT EXISTS banner_url VARCHAR(500);
 
 -- 3. Movie Genres (Bảng liên kết Nhiều - Nhiều phim và thể loại)
 CREATE TABLE IF NOT EXISTS movie_genres (
@@ -179,6 +182,40 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
     expiry_date TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 17. Promotions (Danh sách khuyến mãi & Sự kiện)
+CREATE TABLE IF NOT EXISTS promotions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(500) NOT NULL,
+    link_url VARCHAR(500),
+    type VARCHAR(50) DEFAULT 'PROMOTION', -- 'PROMOTION' hoặc 'EVENT'
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 18. Food Combos (Danh sách bắp nước & Combo bỏng nước)
+CREATE TABLE IF NOT EXISTS food_combos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    image_url VARCHAR(500),
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 19. Booking Combos (Bảng liên kết các Combo bỏng nước trong Đơn hàng)
+CREATE TABLE IF NOT EXISTS booking_combos (
+    booking_id BIGINT NOT NULL,
+    combo_id BIGINT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    price DECIMAL(10, 2) NOT NULL,
+    PRIMARY KEY (booking_id, combo_id),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (combo_id) REFERENCES food_combos(id) ON DELETE RESTRICT
 );
 
 
