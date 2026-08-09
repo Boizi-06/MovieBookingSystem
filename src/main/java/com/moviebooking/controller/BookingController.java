@@ -94,10 +94,7 @@ public class BookingController {
             System.out.println("=================================================");
             System.out.println("[PAYMENT WEBHOOK RAW RECEIVED] " + rawJson);
             System.out.println("=================================================");
-            boolean processed = bookingService.processSepayWebhookRaw(rawJson);
-            if (!processed) {
-                processed = bookingService.processPayOSWebhook(rawJson);
-            }
+            boolean processed = bookingService.processPayOSWebhook(rawJson);
             ApiResponse<String> response = ApiResponse.<String>builder()
                     .success(true)
                     .message(processed ? "Xử lý thanh toán thành công" : "Bỏ qua giao dịch không trùng khớp")

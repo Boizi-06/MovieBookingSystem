@@ -36,8 +36,6 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final TicketRepository ticketRepository;
-    private final com.moviebooking.repository.FoodComboRepository foodComboRepository;
-    private final com.moviebooking.repository.BookingComboRepository bookingComboRepository;
     private final com.moviebooking.service.EmailService emailService;
     private final vn.payos.PayOS payOS;
 
@@ -51,8 +49,6 @@ public class BookingServiceImpl implements BookingService {
                               UserRepository userRepository,
                               PaymentRepository paymentRepository,
                               TicketRepository ticketRepository,
-                              com.moviebooking.repository.FoodComboRepository foodComboRepository,
-                              com.moviebooking.repository.BookingComboRepository bookingComboRepository,
                               com.moviebooking.service.EmailService emailService,
                               vn.payos.PayOS payOS) {
         this.bookingRepository = bookingRepository;
@@ -61,8 +57,6 @@ public class BookingServiceImpl implements BookingService {
         this.userRepository = userRepository;
         this.paymentRepository = paymentRepository;
         this.ticketRepository = ticketRepository;
-        this.foodComboRepository = foodComboRepository;
-        this.bookingComboRepository = bookingComboRepository;
         this.emailService = emailService;
         this.payOS = payOS;
     }
@@ -160,26 +154,7 @@ public class BookingServiceImpl implements BookingService {
             totalPrice = totalPrice.add(seatPrice);
         }
 
-        List<com.moviebooking.entity.BookingCombo> bookingCombosToSave = new ArrayList<>();
-        List<BookingResponse.BookingComboResponse> comboResponses = new ArrayList<>();
 
-        if (request.getCombos() != null && !request.getCombos().isEmpty()) {
-            for (BookingRequest.ComboItemRequest item : request.getCombos()) {
-                if (item.getComboId() != null && item.getQuantity() != null && item.getQuantity() > 0) {
-                    com.moviebooking.entity.FoodCombo combo = foodComboRepository.findById(item.getComboId())
-                            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Combo bỏng nước với ID: " + item.getComboId()));
-                    BigDecimal comboSubtotal = combo.getPrice().multiply(new BigDecimal(item.getQuantity()));
-                    totalPrice = totalPrice.add(comboSubtotal);
-
-                    comboResponses.add(BookingResponse.BookingComboResponse.builder()
-                            .comboId(combo.getId())
-                            .comboName(combo.getName())
-                            .quantity(item.getQuantity())
-                            .price(combo.getPrice())
-                            .build());
-                }
-            }
-        }
 
         String bookingCode = "BKG" + System.currentTimeMillis();
 
@@ -194,27 +169,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        if (request.getCombos() != null && !request.getCombos().isEmpty()) {
-            for (BookingRequest.ComboItemRequest item : request.getCombos()) {
-                if (item.getComboId() != null && item.getQuantity() != null && item.getQuantity() > 0) {
-                    com.moviebooking.entity.FoodCombo combo = foodComboRepository.findById(item.getComboId()).orElse(null);
-                    if (combo != null) {
-                        com.moviebooking.entity.BookingComboId bcId = com.moviebooking.entity.BookingComboId.builder()
-                                .bookingId(savedBooking.getId())
-                                .comboId(combo.getId())
-                                .build();
-                        com.moviebooking.entity.BookingCombo bc = com.moviebooking.entity.BookingCombo.builder()
-                                .id(bcId)
-                                .booking(savedBooking)
-                                .combo(combo)
-                                .quantity(item.getQuantity())
-                                .price(combo.getPrice())
-                                .build();
-                        bookingComboRepository.save(bc);
-                    }
-                }
-            }
-        }
+
 
         List<String> seatCodes = seats.stream().map(Seat::getSeatCode).collect(Collectors.toList());
 
@@ -231,7 +186,7 @@ public class BookingServiceImpl implements BookingService {
                 .status(savedBooking.getStatus())
                 .createdAt(savedBooking.getCreatedAt())
                 .expiresAt(savedBooking.getCreatedAt().plusMinutes(5))
-                .comboItems(comboResponses)
+                .comboItems(new ArrayList<>())
                 .build();
     }
 
@@ -262,15 +217,7 @@ public class BookingServiceImpl implements BookingService {
                     .map(Ticket::getTicketCode)
                     .collect(Collectors.toList());
 
-            List<com.moviebooking.entity.BookingCombo> bookingCombos = bookingComboRepository.findByBookingId(booking.getId());
-            List<BookingResponse.BookingComboResponse> comboItems = bookingCombos.stream()
-                    .map(bc -> BookingResponse.BookingComboResponse.builder()
-                            .comboId(bc.getCombo().getId())
-                            .comboName(bc.getCombo().getName())
-                            .quantity(bc.getQuantity())
-                            .price(bc.getPrice())
-                            .build())
-                    .collect(Collectors.toList());
+        List<BookingResponse.BookingComboResponse> comboItems = new ArrayList<>();
 
             responseList.add(BookingResponse.builder()
                     .id(booking.getId())
@@ -369,15 +316,7 @@ public class BookingServiceImpl implements BookingService {
         long remainingSeconds = java.time.Duration.between(LocalDateTime.now(), expiresAt).getSeconds();
         if (remainingSeconds < 0) remainingSeconds = 0;
 
-        List<com.moviebooking.entity.BookingCombo> bookingCombos = bookingComboRepository.findByBookingId(booking.getId());
-        List<BookingResponse.BookingComboResponse> comboItems = bookingCombos.stream()
-                .map(bc -> BookingResponse.BookingComboResponse.builder()
-                        .comboId(bc.getCombo().getId())
-                        .comboName(bc.getCombo().getName())
-                        .quantity(bc.getQuantity())
-                        .price(bc.getPrice())
-                        .build())
-                .collect(Collectors.toList());
+        List<BookingResponse.BookingComboResponse> comboItems = new ArrayList<>();
 
         return com.moviebooking.dto.PaymentResponse.builder()
                 .bookingCode(booking.getBookingCode())
@@ -466,100 +405,9 @@ public class BookingServiceImpl implements BookingService {
         return booking.getStatus();
     }
 
-    @Override
-    @Transactional
-    public boolean processSepayWebhookRaw(String rawJson) {
-        if (rawJson == null || rawJson.trim().isEmpty()) return false;
 
-        System.out.println("=================================================");
-        System.out.println("[SEPAY PROCESS RAW] Received Raw JSON: " + rawJson);
-        System.out.println("=================================================");
 
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("BKG-?[A-Z0-9]+", java.util.regex.Pattern.CASE_INSENSITIVE);
-        java.util.regex.Matcher matcher = pattern.matcher(rawJson);
 
-        if (!matcher.find()) {
-            System.out.println("[SEPAY PROCESS RAW] ❌ Không tìm thấy chuỗi BKG trong raw JSON.");
-            return false;
-        }
-
-        String rawMatched = matcher.group().trim();
-        String cleanMatched = rawMatched.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
-
-        System.out.println("[SEPAY PROCESS RAW] 🔍 Tìm thấy: " + rawMatched + " -> Mã chuẩn hóa: " + cleanMatched);
-        java.util.Optional<Booking> optionalBooking = bookingRepository.findByNormalizedBookingCode(cleanMatched);
-        if (optionalBooking.isEmpty()) {
-            System.out.println("[SEPAY PROCESS RAW] ❌ Mã đơn hàng không có trong Database: " + cleanMatched);
-            return false;
-        }
-
-        Booking booking = optionalBooking.get();
-        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
-            System.out.println("[SEPAY PROCESS RAW] ℹ️ Đơn hàng không ở trạng thái PENDING_PAYMENT. Trạng thái hiện tại: " + booking.getStatus());
-            return true; // Đã xử lý thanh toán trước đó
-        }
-
-        fulfillPaymentForBooking(booking, "SEPAY-" + System.currentTimeMillis());
-        System.out.println("=================================================");
-        System.out.println("[SEPAY PROCESS RAW] ✅ >>> ĐÃ TỰ ĐỘNG XÁC NHẬN THANH TOÁN VÀ XUẤT VÉ THÀNH CÔNG CHO ĐƠN: " + booking.getBookingCode() + " <<<");
-        System.out.println("=================================================");
-        return true;
-    }
-
-    @Override
-    @Transactional
-    public boolean processSepayWebhook(com.moviebooking.dto.SepayWebhookPayload payload) {
-        if (payload == null) return false;
-
-        String content = "";
-        if (payload.getTransactionContent() != null) {
-            content += payload.getTransactionContent() + " ";
-        }
-        if (payload.getBody() != null) {
-            content += payload.getBody() + " ";
-        }
-        if (payload.getCode() != null) {
-            content += payload.getCode();
-        }
-
-        System.out.println("[SEPAY PROCESS] Chuỗi nội dung tìm kiếm: " + content);
-
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("BKG-?[A-Z0-9]+", java.util.regex.Pattern.CASE_INSENSITIVE);
-        java.util.regex.Matcher matcher = pattern.matcher(content);
-
-        if (!matcher.find()) {
-            System.out.println("[SEPAY PROCESS] Không tìm thấy chuỗi BKG trong nội dung chuyển khoản.");
-            return false;
-        }
-
-        String matchedCode = matcher.group().toUpperCase();
-        if (!matchedCode.contains("-") && matchedCode.length() > 3) {
-            matchedCode = "BKG-" + matchedCode.substring(3);
-        }
-
-        System.out.println("[SEPAY PROCESS] Tìm thấy mã đơn hàng: " + matchedCode);
-        java.util.Optional<Booking> optionalBooking = bookingRepository.findByBookingCode(matchedCode);
-        if (optionalBooking.isEmpty()) {
-            System.out.println("[SEPAY PROCESS] Mã đơn hàng không có trong Database: " + matchedCode);
-            return false;
-        }
-
-        Booking booking = optionalBooking.get();
-        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
-            System.out.println("[SEPAY PROCESS] Đơn hàng không ở trạng thái PENDING_PAYMENT. Trạng thái hiện tại: " + booking.getStatus());
-            return true; // Đã xử lý thanh toán trước đó
-        }
-
-        BigDecimal amountIn = payload.getAmountIn() != null ? payload.getAmountIn() : BigDecimal.ZERO;
-        if (amountIn.compareTo(booking.getTotalPrice()) < 0) {
-            System.out.println("[SEPAY PROCESS] Số tiền chuyển (" + amountIn + ") nhỏ hơn giá vé (" + booking.getTotalPrice() + ")");
-            return false;
-        }
-
-        fulfillPaymentForBooking(booking, "SEPAY-" + (payload.getReferenceNumber() != null ? payload.getReferenceNumber() : System.currentTimeMillis()));
-        System.out.println("[SEPAY PROCESS] >>> ĐÃ TỰ ĐỘNG XÁC NHẬN THANH TOÁN VÀ XUẤT VÉ THÀNH CÔNG CHO ĐƠN: " + matchedCode + " <<<");
-        return true;
-    }
 
     @Override
     @Transactional

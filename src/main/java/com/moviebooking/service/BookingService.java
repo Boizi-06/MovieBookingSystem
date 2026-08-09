@@ -13,8 +13,6 @@ public interface BookingService {
     List<BookingResponse> getBookingHistory(String userEmail);
     com.moviebooking.dto.PaymentResponse getPaymentDetails(Long bookingId, String userEmail);
     void cancelBooking(Long bookingId, String userEmail);
-    boolean processSepayWebhook(com.moviebooking.dto.SepayWebhookPayload payload);
-    boolean processSepayWebhookRaw(String rawJson);
     boolean processPayOSWebhook(String rawJson);
     String getBookingStatus(Long bookingId);
     BookingResponse processPaymentMockSuccess(String bookingCode);
